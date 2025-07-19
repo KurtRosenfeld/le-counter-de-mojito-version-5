@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mojito Counter</title>
+    <title>VOGLIOGUISTIZIA</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -154,10 +154,66 @@
         .counter-btn-minus {
             color: #e74c3c;
         }
+
+        /* NEW STYLES FOR NOTES SECTION */
+        .notes-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .notes-toggle {
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .notes-toggle:hover {
+            background: rgba(44, 62, 80, 1);
+        }
+
+        .notes-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            padding: 15px;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .notes-save {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .notes-save:hover {
+            background: #2ecc71;
+        }
     </style>
 </head>
 <body>
-    <h1>Mojito Counter</h1>
+    <h1>hiersollteeinTitelstehen</h1>
     
     <div class="main-counter" id="mainCounter">0</div>
     
@@ -198,6 +254,15 @@
             </div>
         </div>
     </div>
+
+    <!-- NEW NOTES SECTION -->
+    <div class="notes-container">
+        <button class="notes-toggle" onclick="toggleNotes()">Show Notes</button>
+        <div class="notes-content" id="notesContent">
+            <textarea class="notes-textarea" id="notesTextarea" placeholder="Enter your notes here..."></textarea>
+            <button class="notes-save" onclick="saveNotes()">Save Notes</button>
+        </div>
+    </div>
     
     <script>
         // ===== FIREBASE CONFIG =====
@@ -219,6 +284,7 @@
         let counters = [0, 0, 0, 0];
         let counterNames = ['Bar', 'Kitchen', 'Terrace', 'Storage'];
         let previousTotal = 0;
+        let notes = "";
         
         const colors = [
             '#D1DD76', '#78DDA8', '#E7A938', '#FF7E5F', 
@@ -234,12 +300,14 @@
                     counters = data.counters || [0, 0, 0, 0];
                     counterNames = data.names || ['Bar', 'Kitchen', 'Terrace', 'Storage'];
                     previousTotal = data.total || 0;
+                    notes = data.notes || "";
                     
                     // Update UI
                     for (let i = 1; i <= 4; i++) {
                         document.getElementById(`counter${i}`).textContent = counters[i-1];
                         document.getElementById(`name${i}`).value = counterNames[i-1];
                     }
+                    document.getElementById('notesTextarea').value = notes;
                     updateMainCounter();
                 }
             });
@@ -271,6 +339,26 @@
             mainCounter.textContent = total;
         }
 
+        // Toggle notes visibility
+        function toggleNotes() {
+            const notesContent = document.getElementById('notesContent');
+            const toggleButton = document.querySelector('.notes-toggle');
+            
+            if (notesContent.style.display === 'block') {
+                notesContent.style.display = 'none';
+                toggleButton.textContent = 'Show Notes';
+            } else {
+                notesContent.style.display = 'block';
+                toggleButton.textContent = 'Hide Notes';
+            }
+        }
+
+        // Save notes to Firebase
+        function saveNotes() {
+            notes = document.getElementById('notesTextarea').value;
+            saveData();
+        }
+
         // Auto-save data to Firebase
         function saveData() {
             // Get current names
@@ -282,6 +370,7 @@
                 counters: counters,
                 names: counterNames,
                 total: previousTotal,
+                notes: notes,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
